@@ -30,7 +30,7 @@ export default class App extends Component {
       this.setState({
          doItems: [ ...this.state.doItems, 
           { action: task, done: false}]
-      });
+      }, () => localStorage.setItem("theDos", JSON.stringify(this.state)));
     }
   }
 
@@ -47,6 +47,21 @@ export default class App extends Component {
           callback={ this.toggleDo }/>
       )
 
+  componentDidMount = () => {
+    let data = localStorage.getItem("theDos");
+    this.setState(data != null 
+        ? JSON.parse(data)
+        : {
+          userName: "Asaph",
+          doItems: [
+            {action: "Take Cofee", done: false },
+            { action: "Go for Meeting", done: false },
+            { action: "Take Lunch", done: true },
+            { action: "Make day Calls", done: false }
+          ],
+          showCompleted: true
+        });
+  }
   //changeStateData = () => {
   //  this.setState({
   //    userName: this.state.userName == "Asaph" ? "Binene" : "Asaph"
