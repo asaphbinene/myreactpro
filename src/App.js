@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
-import './App.css';
+import { DoBanner } from "./DoBanner";
+import { DoCreator } from "./DoCreator";
+import { TheDoRow } from "./TheDoRow";
+import { VisibilityControl } from "./VisibilityControl";
+
 
 export default class App extends Component {
   constructor(props) {
@@ -12,8 +16,7 @@ export default class App extends Component {
         { action: "Collect Tickets", done: true },
         { action: "Call Mado", done: false }
       ],
-
-      newItemText: ""
+      showCompleted: true
     }
   }
 
@@ -21,14 +24,12 @@ export default class App extends Component {
     this.setState({ newItemText: event.target.value });
   }
 
-  createNewDo = () => {
-    if(!this.state.doItems
-          .find(item => item.action === this.state.newItemText))
-    {
-      this.setState(
-        {doItems: [ ...this.state.doItems, 
-          { action: this.state.newItemText, done: false}],
-        newItemText: ""
+  createNewDo = ( task ) => {
+    if(!this.state.doItems.find
+        (item => item.action === task )){
+      this.setState({
+         doItems: [ ...this.state.doItems, 
+          { action: task, done: false}]
       });
     }
   }
@@ -36,53 +37,48 @@ export default class App extends Component {
   toggleDo = ( theDo) => this.setState({
     doItems: this.state.doItems.map(
       item => item.action === theDo.action 
-      ? { ... item, done: !item.done } : item )
+      ? { ...item, done: !item.done } : item )
   });
 
-  theDoTableRows = () => this.state.doItems.map(
-    item => 
-    <tr key={ item.action }>
-      <td>{item.action}</td>
-      <td>{item.action}</td>
-      <td>
-        <input type="checkbox" checked = { item.done }
-                onChange={ () => this.toggleDo( item )}/>
-      </td>
-    </tr>
-  )
+  theDoTableRows = ( doneValue ) => this.state.doItems
+    .filter( item => item.done === doneValue).map(
+      item => 
+        <TheDoRow key={ item.action } item={ item } 
+          callback={ this.toggleDo }/>
+      )
 
   //changeStateData = () => {
   //  this.setState({
   //    userName: this.state.userName == "Asaph" ? "Binene" : "Asaph"
   //  })
   //}
-  render = () => {
-    return (
-      <div className="App">
-        <h4 className="bg-primary text-white text-center p-2">
-          { this.state.userName }'s Do Book
-          ({ this.state.doItems.filter(t => !t.done).length } items to book)
-        </h4>
-        <div className="container-fluid">
-          <div className="my-1">
-            <input className="form-control"
-              value={ this.state.newItemText }
-              onChange={ this.updateNewTextValue }/>
-            <button className="btn btn-primary mt-1"
-              onClick={ this.createNewDo }>
-                Add
-            </button>
-          </div>
-          <table className="table table-striped table-bordered">
-            <thead>
-              <tr><th>Description</th><th>Done</th></tr>
-            </thead>
-            <tbody>{ this.theDoTableRows() }</tbody>
-          </table>
+  render = () => 
+    <div>
+      <DoBanner name={ this.state.userName } tasks={ this.state.doItems }/>
+      <div className="container-fluid">
+        <DoCreator callback={ this.createNewDo }/>
+        <table className="table table-striped table-bordered">
+          <thead>
+            <tr><th>Description</th><th>Done</th></tr>
+          </thead>
+          <tbody>{ this.theDoTableRows(false) }</tbody>
+        </table>
+        <div className="bg-secondary text-white text-center p-2">
+          <VisibilityControl description="Completed Tasks"
+            isChecked={ this.state.showCompleted }
+            callback={ (checked) => 
+              this.setState({ showCompleted: checked })}/>
         </div>
+        {
+            this.state.showCompleted &&
+            <table className="table table-striped table-bordered">
+              <thead>
+                <tr><th>Description</th><th>Done</th></tr>
+              </thead>
+              <tbody>{ this.theDoTableRows(true) }</tbody>
+            </table>
+        }
       </div>
-    );
-  }
-  
+    </div>
 }
 
